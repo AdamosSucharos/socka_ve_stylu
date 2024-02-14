@@ -14,16 +14,32 @@ $userSql = sprintf("SELECT * FROM user WHERE user_id = %d", $userId);
 $userResult = $mysqli->query($userSql);
 $user = $userResult->fetch_assoc();
 
-
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["delete_paper"])) {
     $paperIdToDelete = $_POST["delete_paper"];
+    
+
+    $deleteUserSubmissionsSql = sprintf("DELETE FROM user_submissions WHERE test_id IN (SELECT test_id FROM tests WHERE referat_id = %d)", $paperIdToDelete);
+    $mysqli->query($deleteUserSubmissionsSql);
+
+
+    $deleteAnswersSql = sprintf("DELETE FROM answers WHERE question_id IN (SELECT question_id FROM questions WHERE test_id IN (SELECT test_id FROM tests WHERE referat_id = %d))", $paperIdToDelete);
+    $mysqli->query($deleteAnswersSql);
+
+
+    $deleteQuestionsSql = sprintf("DELETE FROM questions WHERE test_id IN (SELECT test_id FROM tests WHERE referat_id = %d)", $paperIdToDelete);
+    $mysqli->query($deleteQuestionsSql);
+
+
+    $deleteTestsSql = sprintf("DELETE FROM tests WHERE referat_id = %d", $paperIdToDelete);
+    $mysqli->query($deleteTestsSql);
+
+
     $deletePaperSql = sprintf("DELETE FROM referaty WHERE referat_id = %d AND user_id = %d", $paperIdToDelete, $userId);
     $mysqli->query($deletePaperSql);
 
     header("Location: profile.php");
     exit;
 }
-
 $referatyData = [];
 $userId = $_SESSION['id'];
 
@@ -52,15 +68,40 @@ if ($isAdmin && isset($_POST['admin_action'])) {
 
     elseif ($adminAction == 'delete_user' && isset($_POST['user_id_to_delete'])) {
         $userIdToDelete = $_POST['user_id_to_delete'];
-    
-        $userHasPapers = $mysqli->query("SELECT COUNT(*) FROM referaty WHERE user_id = $userIdToDelete")->fetch_assoc()['COUNT(*)'];
-    
-        if ($userHasPapers > 0) {
-            $mysqli->query("UPDATE referaty SET user_id = 3 WHERE user_id = $userIdToDelete");
-        }
-        $mysqli->query("DELETE FROM user WHERE user_id = $userIdToDelete");
-
         
+
+        $mysqli->query("DELETE FROM user_submissions WHERE user_id = $userIdToDelete");
+    
+
+        $papersResult = $mysqli->query("SELECT referat_id FROM referaty WHERE user_id = $userIdToDelete");
+    
+
+        while ($row = $papersResult->fetch_assoc()) {
+            $referatId = $row['referat_id'];
+            
+
+            $testsResult = $mysqli->query("SELECT test_id FROM tests WHERE referat_id = $referatId");
+    
+
+            while ($testRow = $testsResult->fetch_assoc()) {
+                $testId = $testRow['test_id'];
+                
+
+                $mysqli->query("DELETE FROM answers WHERE question_id IN (SELECT question_id FROM questions WHERE test_id = $testId)");
+    
+
+                $mysqli->query("DELETE FROM questions WHERE test_id = $testId");
+            }
+    
+
+            $mysqli->query("DELETE FROM tests WHERE referat_id = $referatId");
+        }
+    
+
+        $mysqli->query("DELETE FROM referaty WHERE user_id = $userIdToDelete");
+    
+
+        $mysqli->query("DELETE FROM user WHERE user_id = $userIdToDelete");
     }
     elseif ($adminAction == 'ban_user' && isset($_POST['user_id_to_ban'])) {
         $userIdToBan = $_POST['user_id_to_ban'];
@@ -92,109 +133,197 @@ if ($isAdmin) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="profile.css?rand<?php echo rand(1, 90); ?>";>
-
     <title>User Profile</title>
 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .container {
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+            margin-bottom: 50px;
+        }
+        h3 {
+            color: #007bff;
+        }
+        .table {
+            border-radius: 10px;
+        }
+        .btn {
+            border-radius: 20px;
+        }
+        footer {
+            background-color: lightgrey;
+            color: fblackff;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+        }
+    </style>
 </head>
 <body>
 <?php require_once("header.php"); ?>
+<div class="container">
+    <?php if ($isAdmin): ?>
+        <h3 class="mb-4">Admin Panel</h3>
+        <div class="content">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Meno</th>
+                                <th>E-mail</th>
+                                <th>Akcie</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($usersData as $userData): ?>
+                                <tr>
+                                    <td><?php echo $userData['user_id']; ?></td>
+                                    <td><?php echo $userData['name']; ?></td>
+                                    <td><?php echo $userData['email']; ?></td>
+                                    <td>               
+                                        <form method="post">
+                                            <button type="submit" name="admin_action" value="delete_user" class="btn btn-danger btn-sm">Delete User</button>
+                                            <input type="hidden" name="user_id_to_delete" value="<?php echo $userData['user_id']; ?>">
+                                            <button type="submit" name="admin_action" value="ban_user" class="btn btn-warning btn-sm"><?php echo $userData["is_banned"] == 0 ? "Ban" : "Unban"; ?></button>
+                                            <input type="hidden" name="user_id_to_ban" value="<?php echo $userData['user_id']; ?>">
+                                        </form>
+                                        <form method="post">
+                                            <input type="password" name="new_password" placeholder="Nové heslo" required class="form-control form-control-sm">
+                                            <button type="submit" name="admin_action" value="change_password" class="btn btn-primary btn-sm">Zmeň heslo</button>
+                                            <input type="hidden" name="user_id_to_change" value="<?php echo $userData['user_id']; ?>">
+                                        </form>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-md-6">
+                            <div class="pridanie mt-2"> 
+                                <h4>Pridaj nového používateľa</h4>
+                                <form method="post">
+                                    <div class="mb-3">
+                                        <input type="text" name="name" placeholder="Prezývka" required class="form-control">
+                                    </div>
+                                    <div class="mb-3">
+                                        <input type="email" name="email" id="email" placeholder="E-mail" required class="form-control">
+                                    </div>
+                                    <div class="mb-3">
+                                        <input type="password" name="password" placeholder="Heslo" required class="form-control">
+                                    </div>
+                                    <button type="submit" name="admin_action" value="add_user" class="btn btn-success" style="background-color: #007bff;">Pridaj používateľa</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+        <div class="wrapper mt-5">
+        <div class="papers">
+            <h3 class="mb-4">Tvoje referáty</h3>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Názov</th>
+                                <th>Kategória</th>
+                                <th>Dátum vydania</th>
+                                <th>Škola</th>
+                                <th>Akcie</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($referatyData as $row): ?>
+                                <tr>
+                                    <td><a href="view_paper.php?referat_id=<?php echo $row['referat_id']; ?>"><?php echo $row['title']; ?></a></td>
+                                    <td><?php echo $row['category_name']; ?></td>
+                                    <td><?php echo $row['created_at']; ?></td>
+                                    <td><?php echo $row['skola']; ?></td>
+                                    <td>
+                                        <form method="post">
+                                            <button type="submit" name="delete_paper" value="<?php echo $row['referat_id']; ?>" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="tests">
+                <h3 class="mb-4">Tvoje testy</h3>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Názov referátu</th>
+                                <th>Tvoje skóre</th>
+                                <th>Rank</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
 
-<?php if ($isAdmin): ?>
-    <h3>Admin Panel</h3>
-    <div class="content">
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Meno <form method="get" action="">
-                            <label for="name"></label>
-                            <input type="text" name="name" id="name" placeholder="Meno">
-                            <button type="submit">Hľadaj</button>
-                        </form>
-                </th>
-                <th>Akcie</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($usersData as $userData): 
-                
-                if (isset($_GET['name']) && !empty($_GET['name'])) {
-                    $searchName = $_GET['name'];
-                    if (stripos($userData['name'], $searchName) === false) {
-                        continue; 
-                    }
-                }
-                ?>
-                <tr>
-                    <td><?php echo $userData['user_id']; ?></td>
-                    <td><?php echo $userData['name'] . " " . $userData['email'] ;?></td>
-                    <td>               
+$testSubmissionsSql = "SELECT tests.test_id, tests.referat_id, referaty.title AS test_title, user_submissions.score 
+                                                FROM tests 
+                                                JOIN referaty ON tests.referat_id = referaty.referat_id 
+                                                JOIN user_submissions ON tests.test_id = user_submissions.test_id 
+                                                WHERE user_submissions.user_id = $userId";
+                            $testSubmissionsResult = $mysqli->query($testSubmissionsSql);
 
-                        <form method="post">
-                            <button type="submit" name="admin_action" value="delete_user">
-                                Delete User
-                            </button>
-                            <input type="hidden" name="user_id_to_delete" value="<?php echo $userData['user_id']; ?>">
-                        </form>
-                        <form method="post">
-                            <button type="submit" name="admin_action" value="ban_user">
-                                <?php echo ($user['is_banned'] == 0) ? 'Ban' : 'Unban'; ?>
-                            </button>
-                            <input type="hidden" name="user_id_to_ban" value="<?php echo $userData['user_id']; ?>">
-                        </form>
+                            if ($testSubmissionsResult && $testSubmissionsResult->num_rows > 0) {
+                                while ($testSubmission = $testSubmissionsResult->fetch_assoc()) {
+                                    $testId = $testSubmission['test_id'];
+                                    $referatId = $testSubmission['referat_id'];
+                                    $testTitle = $testSubmission['test_title'];
+                                    $score = $testSubmission['score'];
 
-                        <form method="post">
-                            <input type="password" name="new_password" placeholder="Nové heslo" required>
-                            <button type="submit" name="admin_action" value="change_password">
-                                Zmeň heslo
-                            </button>
-                            <input type="hidden" name="user_id_to_change" value="<?php echo $userData['user_id']; ?>">
-                        </form>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-    <div class="pridanie">
-    <form method="post">
-        <input type="text" name="name" placeholder="Prezývka" required>
-        <input type="email" name="email" id="email" placeholder="E-mail" required>
-        <input type="password" name="password" placeholder="Heslo" required>
-        <button type="submit" name="admin_action" value="add_user">Pridaj používateľa</button>
-    </form>
+                                    // Fetch rank in test scores
+                                    $rankSql = "SELECT COUNT(*) AS rank FROM user_submissions 
+                                            WHERE test_id = $testId AND score > (SELECT IFNULL(score, 0) FROM user_submissions WHERE user_id = $userId AND test_id = $testId)";
+                                    $rankResult = $mysqli->query($rankSql);
+                                    $rank = ($rankResult && $rankResult->num_rows > 0) ? $rankResult->fetch_assoc()['rank'] + 1 : 0;
+                            ?>
+                                    <tr>
+                                        <td><?php echo $testTitle; ?></td>
+                                        <td><?php echo $score !== null ? $score : "Not attempted"; ?></td>
+                                        <td><?php echo $rank > 0 ? $rank : "N/A"; ?></td>
+                                    </tr>
+                            <?php }
+                            } else { ?>
+                                <tr>
+                                    <td colspan="4">No test submissions found.</td>
+                                </tr>
+                            <?php } ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-<?php endif; ?>
-
-<h3>Tvoje referáty</h3>
-<table>
-    <thead>
-        <tr>
-            <th>Názov</th>
-            <th>Kategória</th>
-            <th>Dátum vydania</th>
-            <th>Škola</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php foreach ($referatyData as $row): ?>
-            <tr>
-                <td><a href="view_paper.php?referat_id=<?php echo $row['referat_id']; ?>"><?php echo $row['title']; ?></a></td>
-                <td><?php echo $row['category_name']; ?></td>
-                <td><?php echo $row['created_at']; ?></td>
-                <td><?php echo $row['skola']; ?></td>
-                <td>
-                    <form method="post">
-                        <button type="submit" name="delete_paper" value="<?php echo $row['referat_id']; ?>">Delete</button>
-                    </form>
-                </td>
-            </tr>
-        <?php endforeach; ?>
-    </tbody>
-</table>
+<?php 
+$mysqli->close();
+?>
+<footer class="text-center py-3 fixed-bottom">
+    <p class="mb-0">© <?php echo date("Y"); ?> Referátový sklad. All rights reserved.</p>
+</footer>
 
 </body>
 </html>
-<?php
-

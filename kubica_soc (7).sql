@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hostiteľ: 127.0.0.1
--- Čas generovania: Sun 04.Feb 2024, 14:42
+-- Čas generovania: Sun 11.Feb 2024, 15:16
 -- Verzia serveru: 10.4.25-MariaDB
 -- Verzia PHP: 8.1.10
 
@@ -33,6 +33,92 @@ CREATE TABLE `answers` (
   `answer_text` text NOT NULL,
   `is_correct` tinyint(1) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Sťahujem dáta pre tabuľku `answers`
+--
+
+INSERT INTO `answers` (`answer_id`, `question_id`, `answer_text`, `is_correct`) VALUES
+(121, 31, 'asd', 1),
+(122, 31, 'asd', 0),
+(123, 31, 'asd', 0),
+(124, 31, 'asd', 0),
+(125, 32, 'asd', 1),
+(126, 32, 'asd', 0),
+(127, 32, 'asd', 0),
+(128, 32, 'asd', 0),
+(129, 33, 'asd', 1),
+(130, 33, 'asd', 0),
+(131, 33, 'asd', 0),
+(132, 33, 'asd', 0),
+(133, 34, 'asd', 1),
+(134, 34, 'asd', 0),
+(135, 34, 'asd', 0),
+(136, 34, 'asd', 0),
+(137, 35, 'asd', 1),
+(138, 35, 'asd', 0),
+(139, 35, 'asd', 0),
+(140, 35, 'asd', 0),
+(141, 36, 'asd', 1),
+(142, 36, 'asd', 0),
+(143, 36, 'asasd', 0),
+(144, 36, 'asd', 0),
+(145, 37, 'asd', 1),
+(146, 37, 'asd', 0),
+(147, 37, 'as', 0),
+(148, 37, 'asd', 0),
+(149, 38, 'asd', 1),
+(150, 38, 'asd', 0),
+(151, 38, 'asd', 0),
+(152, 38, 'asd', 0),
+(153, 39, 'asd', 1),
+(154, 39, 'asd', 0),
+(155, 39, 'asd', 0),
+(156, 39, 'asd', 0),
+(157, 40, 'asd', 1),
+(158, 40, 'asd', 0),
+(159, 40, 'asd', 0),
+(160, 40, 'asd', 0),
+(161, 41, 'asd', 1),
+(162, 41, 'asd', 0),
+(163, 41, 'asd', 0),
+(164, 41, 'asd', 0),
+(165, 42, 'asd', 1),
+(166, 42, 'asd', 0),
+(167, 42, 'asd', 0),
+(168, 42, 'asd', 0),
+(169, 43, 'asd', 1),
+(170, 43, 'asd', 0),
+(171, 43, 'asd', 0),
+(172, 43, 'asd', 0),
+(173, 44, 'asd', 1),
+(174, 44, 'asd', 0),
+(175, 44, 'asd', 0),
+(176, 44, 'asd', 0),
+(177, 45, 'asd', 1),
+(178, 45, 'asd', 0),
+(179, 45, 'asd', 0),
+(180, 45, 'asd', 0),
+(181, 46, 'asd', 1),
+(182, 46, 'asd', 0),
+(183, 46, 'asd', 0),
+(184, 46, 'asd', 0),
+(185, 47, 'asd', 1),
+(186, 47, 'asd', 0),
+(187, 47, 'asd', 0),
+(188, 47, 'asd', 0),
+(189, 48, 'asd', 1),
+(190, 48, 'asd', 0),
+(191, 48, 'asd', 0),
+(192, 48, 'asd', 0),
+(193, 49, 'asd', 1),
+(194, 49, 'asd', 0),
+(195, 49, 'asd', 0),
+(196, 49, 'asd', 0),
+(197, 50, 'asd', 1),
+(198, 50, 'asd', 0),
+(199, 50, 'asd', 0),
+(200, 50, 'asd', 0);
 
 -- --------------------------------------------------------
 
@@ -65,18 +151,6 @@ INSERT INTO `category` (`category_id`, `category_name`, `parent_category_id`) VA
 -- --------------------------------------------------------
 
 --
--- Štruktúra tabuľky pre tabuľku `images`
---
-
-CREATE TABLE `images` (
-  `image_id` int(11) NOT NULL,
-  `referat_id` int(11) NOT NULL,
-  `image_data` longblob NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- --------------------------------------------------------
-
---
 -- Štruktúra tabuľky pre tabuľku `questions`
 --
 
@@ -85,6 +159,32 @@ CREATE TABLE `questions` (
   `test_id` int(11) NOT NULL,
   `question_text` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Sťahujem dáta pre tabuľku `questions`
+--
+
+INSERT INTO `questions` (`question_id`, `test_id`, `question_text`) VALUES
+(31, 8, 'asd'),
+(32, 8, 'asd'),
+(33, 8, 'asd'),
+(34, 8, 'asd'),
+(35, 8, 'asd'),
+(36, 9, 'asd'),
+(37, 9, 'asd'),
+(38, 9, 'asd'),
+(39, 9, 'asd'),
+(40, 9, 'asd'),
+(41, 10, 'asd'),
+(42, 10, 'asd'),
+(43, 10, 'asd'),
+(44, 10, 'asd'),
+(45, 10, 'asd'),
+(46, 11, 'asd'),
+(47, 11, 'asd'),
+(48, 11, 'asd'),
+(49, 11, 'asd'),
+(50, 11, 'asd');
 
 -- --------------------------------------------------------
 
@@ -145,6 +245,16 @@ CREATE TABLE `tests` (
   `referat_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Sťahujem dáta pre tabuľku `tests`
+--
+
+INSERT INTO `tests` (`test_id`, `referat_id`) VALUES
+(8, 12),
+(9, 13),
+(10, 17),
+(11, 18);
+
 -- --------------------------------------------------------
 
 --
@@ -165,7 +275,7 @@ CREATE TABLE `user` (
 
 INSERT INTO `user` (`user_id`, `name`, `email`, `password_hash`, `is_banned`) VALUES
 (3, 'adaam', 'skneoxis@gmail.com', '$2y$10$Pghi1uf1zq0r.0BQs/OT0uQHCMhc5S1g9glPt9.s3Yy.RqcOGWGkm', 0),
-(25, 'beast', 'ronadomame535@gmail.com', '$2y$10$wfmJnQTFQHLLe1Z11PwuZOxEwvm.XRJfj1NkCpgA5nmtExpkWfMt6', 0);
+(25, 'beast', 'ronadomame535@gmail.com', '$2y$10$wyuFnTKNa9mL4zSsxfjd9ug3A9B8hzOlU.Y7qFZU.rmdekZosCKBm', 0);
 
 -- --------------------------------------------------------
 
@@ -190,8 +300,18 @@ CREATE TABLE `user_answers` (
 CREATE TABLE `user_submissions` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `test_id` int(11) NOT NULL
+  `test_id` int(11) NOT NULL,
+  `score` decimal(5,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Sťahujem dáta pre tabuľku `user_submissions`
+--
+
+INSERT INTO `user_submissions` (`id`, `user_id`, `test_id`, `score`) VALUES
+(3, 3, 8, '100.00'),
+(4, 25, 8, '60.00'),
+(19, 3, 10, '100.00');
 
 --
 -- Kľúče pre exportované tabuľky
@@ -210,13 +330,6 @@ ALTER TABLE `answers`
 ALTER TABLE `category`
   ADD PRIMARY KEY (`category_id`),
   ADD KEY `parent_category_id` (`parent_category_id`);
-
---
--- Indexy pre tabuľku `images`
---
-ALTER TABLE `images`
-  ADD PRIMARY KEY (`image_id`),
-  ADD KEY `referat_id` (`referat_id`);
 
 --
 -- Indexy pre tabuľku `questions`
@@ -272,7 +385,7 @@ ALTER TABLE `user_submissions`
 -- AUTO_INCREMENT pre tabuľku `answers`
 --
 ALTER TABLE `answers`
-  MODIFY `answer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
+  MODIFY `answer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=201;
 
 --
 -- AUTO_INCREMENT pre tabuľku `category`
@@ -281,34 +394,28 @@ ALTER TABLE `category`
   MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- AUTO_INCREMENT pre tabuľku `images`
---
-ALTER TABLE `images`
-  MODIFY `image_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT pre tabuľku `questions`
 --
 ALTER TABLE `questions`
-  MODIFY `question_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `question_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
 
 --
 -- AUTO_INCREMENT pre tabuľku `referaty`
 --
 ALTER TABLE `referaty`
-  MODIFY `referat_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `referat_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT pre tabuľku `tests`
 --
 ALTER TABLE `tests`
-  MODIFY `test_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `test_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT pre tabuľku `user`
 --
 ALTER TABLE `user`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
 
 --
 -- AUTO_INCREMENT pre tabuľku `user_answers`
@@ -320,7 +427,7 @@ ALTER TABLE `user_answers`
 -- AUTO_INCREMENT pre tabuľku `user_submissions`
 --
 ALTER TABLE `user_submissions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- Obmedzenie pre exportované tabuľky
@@ -337,12 +444,6 @@ ALTER TABLE `answers`
 --
 ALTER TABLE `category`
   ADD CONSTRAINT `category_ibfk_1` FOREIGN KEY (`parent_category_id`) REFERENCES `category` (`category_id`);
-
---
--- Obmedzenie pre tabuľku `images`
---
-ALTER TABLE `images`
-  ADD CONSTRAINT `images_ibfk_1` FOREIGN KEY (`referat_id`) REFERENCES `referaty` (`referat_id`);
 
 --
 -- Obmedzenie pre tabuľku `questions`
